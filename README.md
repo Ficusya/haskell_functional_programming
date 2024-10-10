@@ -36,7 +36,7 @@ cattleProblem :: [(Int, Int, Int)]
 cattleProblem = [(bulls, cows, calves) | 
     bulls <- [0..10], cows <- [0..20], calves <- [0..200], 
     bulls + cows + calves == 100, 
-    10 * bulls + 5 * cows + 0.5 * fromIntegral calves == 100]
+    10 * bulls + 5 * cows + calves / 2 == 100]
 ```
 Функция возвращает список возможных комбинаций покупки быков, коров и телят, при которых общее количество голов скота и общая стоимость составляют 100.
 
