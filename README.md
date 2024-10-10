@@ -31,7 +31,7 @@ isPalindrome xs = xs == reverse xs
 ### Условие:
 Имеется 100 рублей. Сколько быков, коров и телят можно купить на все деньги, если нужно купить ровно 100 голов скота?
 
-Решение:
+### Решение:
 
 ```
 cattleProblem :: [(Int, Int, Int)]
@@ -41,3 +41,43 @@ cattleProblem = [(bulls, cows, calves) |
     10 * bulls + 5 * cows + 0.5 * fromIntegral calves == 100]
 ```
 Функция возвращает список возможных комбинаций покупки быков, коров и телят, при которых общее количество голов скота и общая стоимость составляют 100.
+
+## Задача 45: Найти все трёхзначные простые числа
+
+### Условие:
+Написать функцию, которая возвращает список всех трёхзначных простых чисел.
+
+### Решение:
+```
+isPrime :: Int -> Bool
+isPrime n = n > 1 && all (\x -> n `mod` x /= 0) [2..(floor (sqrt (fromIntegral n)))]
+
+threeDigitPrimes :: [Int]
+threeDigitPrimes = filter isPrime [100..999]
+```
+Функция возвращает список всех простых чисел в диапазоне от 100 до 999.
+
+## Задача 55: Сортировка списков по частоте длин
+
+### Условие:
+Отсортировать список списков по частоте встречаемости их длин. То есть списки с одинаковой длиной должны быть сгруппированы, а затем отсортированы по частоте их длины.
+
+### Решение:
+```
+-- Функция для сортировки по длине списков
+sortLength :: [[a]] -> [[a]]
+sortLength [] = []
+sortLength (x:xs) = sortLength [y | y <- xs, length y <= length x]
+                    ++ [x] ++
+                    sortLength [y | y <- xs, length y > length x]
+
+-- Группировка списка по длинам
+groupLists :: Eq a => [[a]] -> [[[a]]]
+groupLists [] = []
+groupLists (x:xs) = let (first, rest) = span (\y -> length y == length x) xs
+                    in (x:first) : groupLists rest
+
+-- Основная функция для сортировки по частоте
+lfsort :: [[a]] -> [[a]]
+lfsort xs = concat $ sortLength $ groupLists $ sortLength xs
+```
