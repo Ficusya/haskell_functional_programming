@@ -206,3 +206,64 @@ main = do
   putStrLn "---"
   
 ```
+
+## Задача 2.13
+## Явная рекурсия
+```
+sumSeries :: Double -> Double -> Double -> Int -> Double
+sumSeries x epsilon currentSum n
+    | abs term < epsilon = currentSum  -- Если модуль текущего слагаемого меньше epsilon, возвращаем сумму
+    | otherwise = sumSeries x epsilon newSum (n + 1)  -- Иначе продолжаем рекурсию
+  where
+    term = calculateTerm x n  -- Вычисляем текущее слагаемое
+    newSum = currentSum + term  -- Обновляем сумму
+
+calculateTerm :: Double -> Int -> Double
+calculateTerm x n = sign * (fromIntegral numerator / fromIntegral denominator) * (x ** fromIntegral n)
+  where
+    sign = if even n then 1 else -1  -- Чередуем знак
+    numerator = product [1 + 2 * i | i <- [0..(n-1)]]  -- числ 1 * 3 * 5 * ... (2n-1)
+    denominator = product [4 + 2 * i | i <- [0..(n-1)]]  -- знам 4 * 6 * 8 * ... (2n+2)
+
+-- Функция для вычисления суммы ряда с заданной точностью
+calculateSum :: Double -> Double -> Double
+calculateSum x epsilon = sumSeries x epsilon 0 0  -- Начинаем с суммы 0 и индекса 0
+
+main :: IO ()
+main = do
+    let x = 1.0
+    let epsilon = 0.07
+    let result = calculateSum x epsilon
+    putStrLn $ "Сумма ряда: " ++ show result
+    putStrLn $ "Контрольная формула: " ++ show (2 * sqrt (1 + x) - 2)
+
+```
+##  С использованием бесконечных списков и функций zip, 
+map или zipWith без явного использования рекурсии
+```
+-- Функция для вычисления n-го члена ряда
+term :: Int -> Double -> Double
+term n x = sign * (fromIntegral num / fromIntegral denom) * (x ** fromIntegral n)
+  where
+    sign = if even n then 1 else -1
+    num = product [1 + 2 * i | i <- [0..(n-1)]]
+    denom = product [4 + 2 * i | i <- [0..(n-1)]]
+
+-- Бесконечный список членов ряда
+series :: Double -> [Double]
+series x = map (\n -> term n x) [0..]
+
+-- Функция для вычисления суммы ряда с заданной точностью
+sumSeries :: Double -> Double -> Double
+sumSeries x epsilon = sum $ takeWhile (\t -> abs t >= epsilon) (series x)
+
+-- Пример использования
+main :: IO ()
+main = do
+    let x = 1.0 
+    let epsilon = 0.07
+    let result = sumSeries x epsilon
+    putStrLn $ "Сумма ряда: " ++ show result
+    putStrLn $ "Контрольная формула: " ++ show (2 * sqrt (1 + x) - 2)
+
+```
