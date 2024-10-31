@@ -36,7 +36,7 @@ cattleProblem :: [(Int, Int, Int)]
 cattleProblem = [(bulls, cows, calves) | 
     bulls <- [0..10], cows <- [0..20], calves <- [0..200], 
     bulls + cows + calves == 100, 
-    100 * bulls + 50 * cows + 5 * calves == 100]
+    100 * bulls + 50 * cows + 5 * calves == 1000]
 ```
 Функция возвращает список возможных комбинаций покупки быков, коров и телят, при которых общее количество голов скота и общая стоимость составляют 100.
 
@@ -47,9 +47,12 @@ cattleProblem = [(bulls, cows, calves) |
 
 ### Решение:
 ```
-encode :: Eq a => [a] -> [(Int, a)]
-encode [] = []
-encode (x:xs) = (length $ takeWhile (==x) (x:xs), x) : encode (dropWhile (==x) xs)
+groupConsecutive :: Eq a => [a] -> [(Int, a)]
+groupConsecutive [] = []
+groupConsecutive (x:xs) = 
+  let (first, rest) = span (== x) xs
+      count = 1 + length first
+  in (count, x) : groupConsecutive rest
 ```
 Функция возвращает список пар, где каждый элемент содержит количество подряд идущих одинаковых элементов и сам элемент.
 
@@ -61,7 +64,14 @@ encode (x:xs) = (length $ takeWhile (==x) (x:xs), x) : encode (dropWhile (==x) x
 ### Решение:
 ```
 isPrime :: Int -> Bool
-isPrime n = n > 1 && all (\x -> n `mod` x /= 0) [2..(floor (sqrt (fromIntegral n)))]
+isPrime n
+  | n <= 1    = False
+  | n == 2    = True
+  | even n    = False
+  | otherwise = not (any divides [3,5..limit])
+  where
+    limit = floor (sqrt (fromIntegral n))
+    divides x = n `mod` x == 0
 
 threeDigitPrimes :: [Int]
 threeDigitPrimes = filter isPrime [100..999]
@@ -76,20 +86,123 @@ threeDigitPrimes = filter isPrime [100..999]
 
 ### Решение:
 ```
--- Функция для сортировки по длине списков
-sortLength :: [[a]] -> [[a]]
-sortLength [] = []
-sortLength (x:xs) = sortLength [y | y <- xs, length y <= length x]
-                    ++ [x] ++
-                    sortLength [y | y <- xs, length y > length x]
+-- Функция для подсчета частоты каждой длины
+lengthFrequency :: [String] -> [(Int, Int)]
+lengthFrequency xs = countLengths uniqueLengths
+  where
+    lengths = map length xs
+    uniqueLengths = getUnique lengths
 
--- Группировка списка по длинам
-groupLists :: Eq a => [[a]] -> [[[a]]]
-groupLists [] = []
-groupLists (x:xs) = let (first, rest) = span (\y -> length y == length x) xs
-                    in (x:first) : groupLists rest
+    getUnique [] = []
+    getUnique (y:ys) = y : getUnique (filter (/= y) ys)
 
--- Основная функция для сортировки по частоте
-lfsort :: [[a]] -> [[a]]
-lfsort xs = concat $ sortLength $ groupLists $ sortLength xs
+    countLengths [] = []
+    countLengths (l:ls) = (l, length (filter (== l) lengths)) : countLengths ls
+
+-- Функция для сортировки строк по частоте длины
+sortStringsByLengthFrequency :: [String] -> [String]
+sortStringsByLengthFrequency xs = reverse (go sortedFrequency [])
+  where
+    frequency = lengthFrequency xs
+    sortedFrequency = sortFrequency frequency
+
+    -- Сортируем по возрастанию частоты
+    sortFrequency [] = []
+    sortFrequency (x:xs) = sortFrequency [(l, f) | (l, f) <- xs, f >= snd x] ++ 
+                           [x] ++ 
+                           sortFrequency [(l, f) | (l, f) <- xs, f < snd x]
+
+    go [] acc = acc
+    go ((len, _):ys) acc = go ys (acc ++ filter ((== len) . length) xs)
+```
+
+## Вся программа:
+```
+isPalindrome :: Eq a => [a] -> Bool
+isPalindrome xs = xs == reverse xs
+
+cattleProblem :: [(Int, Int, Int)]
+cattleProblem = [(bulls, cows, calves) | 
+    bulls <- [0..10], cows <- [0..20], calves <- [0..200], 
+    bulls + cows + calves == 100, 
+    100 * bulls + 50 * cows + 5 * calves == 1000]
+  
+groupConsecutive :: Eq a => [a] -> [(Int, a)]
+groupConsecutive [] = []
+groupConsecutive (x:xs) = 
+  let (first, rest) = span (== x) xs
+      count = 1 + length first
+  in (count, x) : groupConsecutive rest
+
+isPrime :: Int -> Bool
+isPrime n
+  | n <= 1    = False
+  | n == 2    = True
+  | even n    = False
+  | otherwise = not (any divides [3,5..limit])
+  where
+    limit = floor (sqrt (fromIntegral n))
+    divides x = n `mod` x == 0
+
+threeDigitPrimes :: [Int]
+threeDigitPrimes = filter isPrime [100..999]
+
+-- Функция для подсчета частоты каждой длины
+lengthFrequency :: [String] -> [(Int, Int)]
+lengthFrequency xs = countLengths uniqueLengths
+  where
+    lengths = map length xs
+    uniqueLengths = getUnique lengths
+
+    getUnique [] = []
+    getUnique (y:ys) = y : getUnique (filter (/= y) ys)
+
+    countLengths [] = []
+    countLengths (l:ls) = (l, length (filter (== l) lengths)) : countLengths ls
+
+-- Функция для сортировки строк по частоте длины
+sortStringsByLengthFrequency :: [String] -> [String]
+sortStringsByLengthFrequency xs = reverse (go sortedFrequency [])
+  where
+    frequency = lengthFrequency xs
+    sortedFrequency = sortFrequency frequency
+
+    -- Сортируем по возрастанию частоты
+    sortFrequency [] = []
+    sortFrequency (x:xs) = sortFrequency [(l, f) | (l, f) <- xs, f >= snd x] ++ 
+                           [x] ++ 
+                           sortFrequency [(l, f) | (l, f) <- xs, f < snd x]
+
+    go [] acc = acc
+    go ((len, _):ys) acc = go ys (acc ++ filter ((== len) . length) xs)
+    
+main :: IO ()
+main = do
+  putStrLn "Testing task 1: isPalindrome"  
+  let test1 = isPalindrome "abcba"
+  putStrLn $ "abcba test: " ++ show test1  
+  let test2 = isPalindrome "abc"
+  putStrLn $ "abc test: " ++ show test2  
+  let test3 = isPalindrome ""
+  putStrLn $ "'' test: " ++ show test3  
+  let test4 = isPalindrome [1, 2, 3, 2, 1]
+  putStrLn $ "[1, 2, 3, 2, 1] test: " ++ show test4  
+  let test5 = isPalindrome [1, 2, 3, 4]
+  putStrLn $ "[1, 2, 3, 4] test: " ++ show test5
+  putStrLn "---"
+  putStrLn "Testing task 2: cattleProblem"  
+  print cattleProblem
+  putStrLn "---"
+  putStrLn "Testing task 3: groupConsecutive. Test data: aaaabccaadeeee"  
+  let input = "aaaabccaadeeee"
+  let result = groupConsecutive input  
+  print result
+  putStrLn "---"
+  putStrLn "Testing task 4: all three-digit prime numbers." 
+  print threeDigitPrimes
+  putStrLn "---"
+  putStrLn "Testing task 5: sort by length frequency. Test data: [abc, de, fgh, de, ijkl, mn, o] " 
+  print $ sortStringsByLengthFrequency ["abc", "de", "fgh", "de", "ijkl", "mn", "o"]
+  putStrLn "---"
+  
 ```
