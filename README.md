@@ -31,7 +31,7 @@ isPalindrome xs = xs == reverse xs
 
 ### Решение:
 
-```
+```haskell
 cattleProblem :: [(Int, Int, Int)]
 cattleProblem = [(bulls, cows, calves) | 
     bulls <- [0..10], cows <- [0..20], calves <- [0..200], 
@@ -46,7 +46,7 @@ cattleProblem = [(bulls, cows, calves) |
 Дан список из n элементов. Разбить список на подсписки одинаковых элементов идущих подряд и подсчитать их количество: “aaaabccaadeeee” -> [(4,'a'),(1,'b'),(2,'c'),(2,'a'),(1,'d'),(4,'e')]
 
 ### Решение:
-```
+```haskell
 groupConsecutive :: Eq a => [a] -> [(Int, a)]
 groupConsecutive [] = []
 groupConsecutive (x:xs) = 
@@ -62,7 +62,7 @@ groupConsecutive (x:xs) =
 Написать функцию, которая возвращает список всех трёхзначных простых чисел.
 
 ### Решение:
-```
+```haskell
 isPrime :: Int -> Bool
 isPrime n
   | n <= 1    = False
@@ -85,7 +85,7 @@ threeDigitPrimes = filter isPrime [100..999]
 То есть списки с одинаковой длиной должны быть сгруппированы, а затем отсортированы по частоте их длины.
 
 ### Решение:
-```
+```haskell
 -- Функция для подсчета частоты каждой длины
 lengthFrequency :: [String] -> [(Int, Int)]
 lengthFrequency xs = countLengths uniqueLengths
@@ -117,7 +117,7 @@ sortStringsByLengthFrequency xs = reverse (go sortedFrequency [])
 ```
 
 ## Вся программа:
-```
+```haskell
 isPalindrome :: Eq a => [a] -> Bool
 isPalindrome xs = xs == reverse xs
 
@@ -209,7 +209,7 @@ main = do
 
 ## Задача 2.13: Нахождение суммы ряда с точностью ε
 ## Явная рекурсия
-```
+```haskell
 sumSeries :: Double -> Double -> Double -> Int -> Double
 sumSeries x epsilon currentSum n
     | abs term < epsilon = currentSum  -- Если модуль текущего слагаемого меньше epsilon, возвращаем сумму
@@ -238,7 +238,7 @@ main = do
 
 ```
 ##  С использованием бесконечных списков и функций zip, map или zipWith без явного использования рекурсии
-```
+```haskell
 term :: Int -> Double -> Double
 term n x = sign * (fromIntegral num / fromIntegral denom) * (x ** fromIntegral n)
   where
