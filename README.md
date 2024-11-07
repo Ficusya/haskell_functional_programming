@@ -225,7 +225,6 @@ calculateTerm x n = sign * (fromIntegral numerator / fromIntegral denominator) *
     numerator = product [1 + 2 * i | i <- [0..(n-1)]]  -- числ 1 * 3 * 5 * ... (2n-1)
     denominator = product [4 + 2 * i | i <- [0..(n-1)]]  -- знам 4 * 6 * 8 * ... (2n+2)
 
--- Функция для вычисления суммы ряда с заданной точностью
 calculateSum :: Double -> Double -> Double
 calculateSum x epsilon = sumSeries x epsilon 0 0  -- Начинаем с суммы 0 и индекса 0
 
@@ -240,7 +239,6 @@ main = do
 ```
 ##  С использованием бесконечных списков и функций zip, map или zipWith без явного использования рекурсии
 ```
--- Функция для вычисления n-го члена ряда
 term :: Int -> Double -> Double
 term n x = sign * (fromIntegral num / fromIntegral denom) * (x ** fromIntegral n)
   where
@@ -248,15 +246,12 @@ term n x = sign * (fromIntegral num / fromIntegral denom) * (x ** fromIntegral n
     num = product [1 + 2 * i | i <- [0..(n-1)]]
     denom = product [4 + 2 * i | i <- [0..(n-1)]]
 
--- Бесконечный список членов ряда
 series :: Double -> [Double]
 series x = map (\n -> term n x) [0..]
 
--- Функция для вычисления суммы ряда с заданной точностью
 sumSeries :: Double -> Double -> Double
 sumSeries x epsilon = sum $ takeWhile (\t -> abs t >= epsilon) (series x)
 
--- Пример использования
 main :: IO ()
 main = do
     let x = 1.0 
