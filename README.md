@@ -224,7 +224,7 @@ sumSeries x epsilon currentSum n
     newSum = currentSum + term  -- Обновляем сумму
 
 calculateTerm :: Double -> Int -> Double
-calculateTerm x n = sign * (fromIntegral numerator / fromIntegral denominator) * (x ** fromIntegral n)
+calculateTerm x n = sign * (fromIntegral numerator / fromIntegral denominator) * (x ** fromIntegral (n+1))
   where
     sign = if even n then 1 else -1  -- Чередуем знак
     numerator = product [1 + 2 * i | i <- [0..(n-1)]]  -- числ 1 * 3 * 5 * ... (2n-1)
@@ -235,12 +235,13 @@ calculateSum x epsilon = sumSeries x epsilon 0 0  -- Начинаем с сум�
 
 main :: IO ()
 main = do
-    let x = 1.0
-    let epsilon = 0.07
+    let x = 0.5
+    let epsilon = 0.0001
     let result = calculateSum x epsilon
+    let check = (2 * sqrt (1 + x) - 2)
     putStrLn $ "Сумма ряда: " ++ show result
-    putStrLn $ "Контрольная формула: " ++ show (2 * sqrt (1 + x) - 2)
-
+    putStrLn $ "Контрольная формула: " ++ show check
+    putStrLn $ "Разница: " ++ show (check - result)
 ```
 ##  С использованием бесконечных списков и функций zip, map или zipWith без явного использования рекурсии
 ```haskell
