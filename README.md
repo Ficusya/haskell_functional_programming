@@ -2,13 +2,18 @@
 
 Решения выполнены с учетом ограничения: используются только функции, доступные в основном модуле `Prelude`, который подключается автоматически, если явно не указано обратное.
 
-## Список задач
+## Список задач первой лабораторной
 1. [Задача 2: Проверка, является ли список палиндромом](#задача-2-проверка-является-ли-список-палиндромом)
 2. [Задача 30: Задача про покупку скота](#задача-30-задача-про-покупку-скота)
 3. [Задача 32: Кодирование списка с подсчетом повторяющихся элементов](#задача-32-кодирование-списка-с-подсчетом-повторяющихся-элементов)
 4. [Задача 45: Найти все трёхзначные простые числа](#задача-45-найти-все-трёхзначные-простые-числа)
 5. [Задача 55: Сортировка списков по частоте длин](#задача-55-сортировка-списков-по-частоте-длин)
 6. [Задача 2.13: Нахождение суммы ряда с точностью ε](#задача-213-нахождение-суммы-ряда-с-точностью-ε)
+
+## Список задач второй лабораторной
+1. [Задача 1: Придумать свой класс типов](#задача-1-придумать-свой-класс-типов)
+2. [Задача 7: Поиск в бинарном дереве](#задача-7-поиск-в-бинарном-дереве)
+3. [Задача 17: Каталог книг](#задача-17-каталог-книг)
 
 ---
 
@@ -259,5 +264,148 @@ main = do
     let result = sumSeries x epsilon
     putStrLn $ "Сумма ряда: " ++ show result
     putStrLn $ "Контрольная формула: " ++ show (2 * sqrt (1 + x) - 2)
+
+```
+
+## Задача 1: Придумать свой класс типов
+Придумать свой класс типов, который содержит как минимум
+две функции, одна из которых выражается через другие.
+Написать реализацию этого класса типов для любых двух типов
+данных, типы данных выбирать такие, чтобы их реализации
+отличались (можно использовать свои собственные типы
+данных).
+
+```haskell
+class Calculable a where
+    calc1 :: a -> a -> a
+    calc2 :: a -> a -> a
+    calc2 x y = calc1 x y `calc1` y
+
+instance Calculable Int where
+    calc1 x y = x + y
+
+data Point = Point Int Int deriving Show
+
+instance Calculable Point where
+    calc1 (Point x1 y1) (Point x2 y2) = Point (x1 + x2) (y1 + y2)
+
+main :: IO ()
+main = do
+    let intResult1 = calc1 (3 :: Int) (5 :: Int)
+    let intResult2 = calc2 (3 :: Int) (5 :: Int)
+    putStrLn $ "calc1 for Int: " ++ show intResult1
+    putStrLn $ "calc2 for Int: " ++ show intResult2
+    
+    let p1 = Point 1 2
+    let p2 = Point 3 4
+    let pointResult1 = calc1 p1 p2
+    let pointResult2 = calc2 p1 p2
+    putStrLn $ "calc1 for Point: " ++ show pointResult1
+    putStrLn $ "calc2 for Point: " ++ show pointResult2
+```
+
+## Задача 7: Поиск в бинарном дереве
+Дано бинарное дерево, определить содержит ли оно элемент E. 
+```haskell
+data MyBinaryTree a = Empty | Node a (MyBinaryTree a) (MyBinaryTree a) deriving Show
+
+data MyBool = MyTrue | MyFalse deriving Show
+
+contains :: Eq a => a -> MyBinaryTree a -> MyBool
+contains _ Empty = MyFalse
+contains e (Node x left right)
+    | x == e  = MyTrue
+    | otherwise   = case contains e left of
+                      MyTrue -> MyTrue
+                      MyFalse -> contains e right
+
+main :: IO ()
+main = do
+    let tree = Node 5
+                (Node 3
+                    (Node 2 Empty Empty)
+                    (Node 4 Empty Empty))
+                (Node 7
+                    (Node 6 Empty Empty)
+                    (Node 8 Empty Empty))
+    let e = 2
+    putStrLn $ "Does the tree contain " ++ show e ++ "? " ++ show (contains e tree)
+```
+
+## Задача 17: Каталог книг
+Создать тип данных каталог книг. Написать функции
+добавления книг в каталог, удаления книг из каталога, поиска
+книг в каталоге по разным критериям (например по автору,
+названию, жанру и т.д.). Написать функцию сортировки книг в
+каталоге, поддержать возможность сортировать по разным
+критериям.
+
+```haskell
+import Data.List (sortOn)
+
+type Author = String
+type Title = String
+type Genre = String
+
+data Book = Book {
+    title :: Title,
+    author :: Author,
+    genre :: Genre
+} deriving (Show, Eq)
+
+data Catalog = Catalog [Book] deriving Show
+
+data SortCriterion = SortByTitle | SortByAuthor | SortByGenre deriving (Show, Eq)
+
+data SearchCriterion = SearchByTitle Title | SearchByAuthor Author | SearchByGenre Genre deriving (Show, Eq)
+
+addBook :: Book -> Catalog -> Catalog
+addBook book (Catalog books) = Catalog (book : books)
+
+removeBook :: Book -> Catalog -> Catalog
+removeBook book (Catalog books) = Catalog (filter (/= book) books)
+
+searchBooks :: SearchCriterion -> Catalog -> [Book]
+searchBooks (SearchByTitle titleName) (Catalog books) = filter (\b -> title b == titleName) books
+searchBooks (SearchByAuthor authorName) (Catalog books) = filter (\b -> author b == authorName) books
+searchBooks (SearchByGenre genreName) (Catalog books) = filter (\b -> genre b == genreName) books
+
+sortCatalog :: SortCriterion -> Catalog -> [Book]
+sortCatalog SortByTitle (Catalog books) = sortOn title books
+sortCatalog SortByAuthor (Catalog books) = sortOn author books
+sortCatalog SortByGenre (Catalog books) = sortOn genre books
+
+main :: IO ()
+main = do
+    let book1 = Book "Book B" "Author C" "Fantasy"
+    let book2 = Book "Book A" "Author D" "Science Fiction"
+    let book3 = Book "Book D" "Author A" "Drama"
+    let book4 = Book "Book C" "Author B" "Detective"
+    let catalog = addBook book1 $ addBook book2 $ addBook book3 $ addBook book4 $ Catalog []
+
+    putStrLn "Catalog after adding books:"
+    print catalog
+
+    let catalogAfterRemoval = removeBook book2 catalog
+    putStrLn "\nCatalog after removing book 2:"
+    print catalogAfterRemoval
+
+    putStrLn "\nSearch by author 'Author A':"
+    print $ searchBooks (SearchByAuthor "Author A") catalog
+
+    putStrLn "\nSearch by title 'Book A':"
+    print $ searchBooks (SearchByTitle "Book A") catalog
+
+    putStrLn "\nSearch by genre 'Fantasy':"
+    print $ searchBooks (SearchByGenre "Fantasy") catalog
+
+    putStrLn "\nCatalog sorted by title:"
+    print $ sortCatalog SortByTitle catalog
+
+    putStrLn "\nCatalog sorted by author:"
+    print $ sortCatalog SortByAuthor catalog
+
+    putStrLn "\nCatalog sorted by genre:"
+    print $ sortCatalog SortByGenre catalog
 
 ```
