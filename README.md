@@ -246,7 +246,7 @@ main = do
 ##  С использованием бесконечных списков и функций zip, map или zipWith без явного использования рекурсии
 ```haskell
 term :: Int -> Double -> Double
-term n x = sign * (fromIntegral num / fromIntegral denom) * (x ** fromIntegral n)
+term n x = sign * (fromIntegral num / fromIntegral denom) * (x ** fromIntegral (n+1))
   where
     sign = if even n then 1 else -1
     num = product [1 + 2 * i | i <- [0..(n-1)]]
@@ -260,12 +260,13 @@ sumSeries x epsilon = sum $ takeWhile (\t -> abs t >= epsilon) (series x)
 
 main :: IO ()
 main = do
-    let x = 1.0 
-    let epsilon = 0.07
+    let x = 0.5
+    let epsilon = 0.0001
     let result = sumSeries x epsilon
+    let check = (2 * sqrt (1 + x) - 2)
     putStrLn $ "Сумма ряда: " ++ show result
-    putStrLn $ "Контрольная формула: " ++ show (2 * sqrt (1 + x) - 2)
-
+    putStrLn $ "Контрольная формула: " ++ show check
+    putStrLn $ "Разница: " ++ show (check - result)
 ```
 
 ## Задача 1: Придумать свой класс типов
