@@ -15,6 +15,9 @@
 2. [Задача 7: Поиск в бинарном дереве](#задача-7-поиск-в-бинарном-дереве)
 3. [Задача 17: Каталог книг](#задача-17-каталог-книг)
 
+## Список задач третьей лабораторной
+1. [Задача 1: Апгрейд задачи 17 из второй лабораторной](#задача-1-Апгрейд-задачи-17-из-второй-лабораторной)
+
 ---
 
 ## Задача 2: Проверка, является ли список палиндромом
@@ -410,4 +413,154 @@ main = do
     putStrLn "\nCatalog sorted by genre:"
     print $ sortCatalog SortByGenre catalog
 
+```
+
+## Задача 1: Апгрейд задачи 17 из второй лабораторной
+```haskell
+import Data.List (sortOn)
+import System.IO (hFlush, stdout)
+
+type Author = String
+type Title = String
+type Genre = String
+
+data Book = Book {
+    title :: Title,
+    author :: Author,
+    genre :: Genre
+} deriving (Show, Eq)
+
+data Catalog = Catalog [Book] deriving Show
+
+data SortCriterion = SortByTitle | SortByAuthor | SortByGenre deriving (Show, Eq)
+
+data SearchCriterion = SearchByTitle Title | SearchByAuthor Author | SearchByGenre Genre deriving (Show, Eq)
+
+addBook :: Book -> Catalog -> Catalog
+addBook book (Catalog books) = Catalog (book : books)
+
+removeBook :: Book -> Catalog -> Catalog
+removeBook book (Catalog books) = Catalog (filter (/= book) books)
+
+searchBooks :: SearchCriterion -> Catalog -> [Book]
+searchBooks (SearchByTitle titleName) (Catalog books) = filter (\b -> title b == titleName) books
+searchBooks (SearchByAuthor authorName) (Catalog books) = filter (\b -> author b == authorName) books
+searchBooks (SearchByGenre genreName) (Catalog books) = filter (\b -> genre b == genreName) books
+
+sortCatalog :: SortCriterion -> Catalog -> [Book]
+sortCatalog SortByTitle (Catalog books) = sortOn title books
+sortCatalog SortByAuthor (Catalog books) = sortOn author books
+sortCatalog SortByGenre (Catalog books) = sortOn genre books
+
+showMenu :: IO ()
+showMenu = do
+    putStrLn "Choose an option:"
+    putStrLn "1. Add a book"
+    putStrLn "2. Remove a book"
+    putStrLn "3. Search for books"
+    putStrLn "4. Sort the catalog"
+    putStrLn "5. Show the catalog"
+    putStrLn "6. Exit"
+    putStr "Enter your choice: "
+    hFlush stdout
+
+addBookFromConsole :: Catalog -> IO Catalog
+addBookFromConsole catalog = do
+    putStrLn "Enter the title of the book:"
+    title <- getLine
+    putStrLn "Enter the author of the book:"
+    author <- getLine
+    putStrLn "Enter the genre of the book:"
+    genre <- getLine
+    let book = Book title author genre
+    return (addBook book catalog)
+
+removeBookFromConsole :: Catalog -> IO Catalog
+removeBookFromConsole catalog = do
+    putStrLn "Enter the title of the book to remove:"
+    title <- getLine
+    putStrLn "Enter the author of the book to remove:"
+    author <- getLine
+    putStrLn "Enter the genre of the book to remove:"
+    genre <- getLine
+    let book = Book title author genre
+    return (removeBook book catalog)
+
+searchBooksFromConsole :: Catalog -> IO ()
+searchBooksFromConsole catalog = do
+    putStrLn "Choose a search criterion:"
+    putStrLn "1. By title"
+    putStrLn "2. By author"
+    putStrLn "3. By genre"
+    putStr "Enter your choice: "
+    hFlush stdout
+    criterionChoice <- getLine
+    case criterionChoice of
+        "1" -> do
+            putStrLn "Enter the title to search for:"
+            title <- getLine
+            let results = searchBooks (SearchByTitle title) catalog
+            print results
+        "2" -> do
+            putStrLn "Enter the author to search for:"
+            author <- getLine
+            let results = searchBooks (SearchByAuthor author) catalog
+            print results
+        "3" -> do
+            putStrLn "Enter the genre to search for:"
+            genre <- getLine
+            let results = searchBooks (SearchByGenre genre) catalog
+            print results
+        _ -> putStrLn "Invalid choice"
+
+sortCatalogFromConsole :: Catalog -> IO ()
+sortCatalogFromConsole catalog = do
+    putStrLn "Choose a sort criterion:"
+    putStrLn "1. By title"
+    putStrLn "2. By author"
+    putStrLn "3. By genre"
+    putStr "Enter your choice: "
+    hFlush stdout
+    criterionChoice <- getLine
+    case criterionChoice of
+        "1" -> do
+            let sortedCatalog = sortCatalog SortByTitle catalog
+            print sortedCatalog
+        "2" -> do
+            let sortedCatalog = sortCatalog SortByAuthor catalog
+            print sortedCatalog
+        "3" -> do
+            let sortedCatalog = sortCatalog SortByGenre catalog
+            print sortedCatalog
+        _ -> putStrLn "Invalid choice"
+
+main :: IO ()
+main = do
+    let catalog = Catalog []
+    loop catalog
+
+loop :: Catalog -> IO ()
+loop catalog = do
+    showMenu
+    choice <- getLine
+    case choice of
+        "1" -> do
+            newCatalog <- addBookFromConsole catalog
+            loop newCatalog
+        "2" -> do
+            newCatalog <- removeBookFromConsole catalog
+            loop newCatalog
+        "3" -> do
+            searchBooksFromConsole catalog
+            loop catalog
+        "4" -> do
+            sortCatalogFromConsole catalog
+            loop catalog
+        "5" -> do
+            print catalog
+            loop catalog
+        "6" -> putStrLn "Exiting..."
+        _ -> do
+            putStrLn "Invalid choice"
+            loop catalog
 ```
