@@ -591,10 +591,10 @@ passExam subject score = tell ([subject], Sum score)
 
 session :: Writer SessionLog ()
 session = do
-    passExam "Math" 90
-    passExam "Physics" 85
-    passExam "History" 75
-    passExam "Literature" 80
+    passExam "Functional Programming" 90
+    passExam "Math" 85
+    passExam "Economy" 75
+    passExam "Philosophy" 80
 
 getObjects :: Writer SessionLog () -> [String]
 getObjects w = let ((), (subjects, _)) = runWriter w in subjects
