@@ -17,6 +17,7 @@
 
 ## Список задач третьей лабораторной
 1. [Задача 1: Апгрейд задачи 17 из второй лабораторной](#задача-1-Апгрейд-задачи-17-из-второй-лабораторной)
+2. [Задача 3: Сдача сессии студентом](#задача-1-Сдача-сессии-студентом)
 
 ---
 
@@ -569,4 +570,44 @@ loop catalog = do
         _ -> do
             putStrLn "Invalid choice"
             loop catalog
+```
+
+## Задача 3: Сдача сессии студентом
+С помощью монады Writer и do нотации написать функцию,
+которая будет имитировать сдачу сессии студентом, то есть
+монада Writer должна уметь сохранять в себе список предметов в
+порядке их сдачи и сумму всех баллов за экзамены. Реализовать
+функции, которые будут из монады Writer доставать список
+сданных предметов в порядке их сдачи, и средний балл за все
+экзамены.
+
+```haskell
+import Control.Monad.Writer
+
+type SessionLog = ([String], Sum Int)
+
+passExam :: String -> Int -> Writer SessionLog ()
+passExam subject score = tell ([subject], Sum score)
+
+session :: Writer SessionLog ()
+session = do
+    passExam "Math" 90
+    passExam "Physics" 85
+    passExam "History" 75
+    passExam "Literature" 80
+
+getObjects :: Writer SessionLog () -> [String]
+getObjects w = let ((), (subjects, _)) = runWriter w in subjects
+
+getAverageScore :: Writer SessionLog () -> Int
+getAverageScore w =
+    let ((), (subjects, Sum totalScore)) = runWriter w
+        count = length subjects
+    in if count > 0 then totalScore `div` count else 0
+
+main :: IO ()
+main = do
+    let log = session
+    putStrLn $ "Subjects: " ++ show (getObjects log)
+    putStrLn $ "Average score: " ++ show (getAverageScore log)
 ```
